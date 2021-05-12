@@ -48,6 +48,12 @@ target_include_directories( coverity_analysis
 # Build SNTP library target without custom config dependency.
 target_compile_definitions( coverity_analysis PUBLIC SNTP_DO_NOT_USE_CUSTOM_CONFIG=1 )
 
+# Add coverage flags to the library if ENABLE_COVERAGE variable is passed from command line.
+if(DEFINED ENABLE_COVERAGE AND ENABLE_COVERAGE EQUAL 1)
+    message("Adding --coverage flag to library files.")
+    target_compile_options(coverity_analysis PUBLIC --coverage )
+endif()
+
 #  ==================================== Unit Test Configuration ====================================
 
 # Include CMock build configuration.
