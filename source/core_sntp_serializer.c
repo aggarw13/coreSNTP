@@ -279,7 +279,7 @@ static int64_t safeTimeDifference( uint32_t serverTimeSec,
             eraAdjustedDiff = diffWithNoEraAdjustment;
         }
         /* Check if server time is an NTP era ahead of client time. */
-        else if( absSameEraDiff <= absServerEraAheadDiff )
+        else if( absServerEraAheadDiff < absSameEraDiff )
         {
             /* Server time is in NTP era 1 while client time is in NTP era 0. */
             eraAdjustedDiff = diffWithServerEraAdjustment;
