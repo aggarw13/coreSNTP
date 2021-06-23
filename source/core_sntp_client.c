@@ -681,7 +681,7 @@ static SntpStatus_t processServerResponse( SntpContext_t * pContext,
 
             /* Update the system clock with the calculated offset. */
             pContext->setTimeFunc( pServer, &parsedResponse.serverTime,
-                                   parsedResponse.clockOffsetSec, parsedResponse.leapSecondType );
+                                   &parsedResponse.clockOffset, parsedResponse.leapSecondType );
 
             status = SntpSuccess;
         }

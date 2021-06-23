@@ -269,18 +269,24 @@ typedef struct SntpTimestamp
  * @brief Structure for holding system clock offset relative to the server information calculated
  * by the coreSNTP library from an SNTP server response.
  *
- * @note If the seconds part of the clock offset is positive, the system time is behind the server time.
- * If the seconds part of the clock offset is positive, the system time is ahead of the server time.
- * Depending on the degree of system clock drift (represented by the clock-offset) and the application's
+ * @note If the the system time is behind the server time, then the isClientBehindServer member of the
+ * structure will be set to #true.
+ * If either the system time is ahead of the server time OR is exactly the same (at the millisecond resolution)
+ * as the server time, the isClientBehindServer member of the structure will be set to #false.
+ *
+ * @note Depending on the degree of system clock drift (represented by the clock-offset) and the application's
  * tolerance for system clock error, clock discipline methodologies like "step", "slew" OR combination
  * of both can be used to correct system clock.
  */
 typedef struct SntpClockOffset
 {
-    int32_t seconds;       /**< @brief The seconds part of the clock offset value. This value
-                            * can be negative. */
-    uint16_t milliseconds; /**< @brief The milliseconds part of the clock offset value. This
-                            *  value is always positive.*/
+    bool isisClientBehindServer; /**<@brief Flag indicating whether the system (or client) time is behind
+                                  * the server. This flag suggests whether the clock offset value needs to be
+                                  * positively or negatively compensated in the system clock, depending on the
+                                  * application-chosen clock discipline methodology. */
+    uint32_t seconds;            /**< @brief The seconds part of the clock offset value. */
+    uint16_t milliseconds;       /**< @brief The milliseconds part of the clock offset value. This
+                                  *  value is always positive.*/
 } SntpClockOffset_t;
 
 /**
@@ -315,10 +321,10 @@ typedef struct SntpResponse
     uint32_t rejectedResponseCode;
 
     /**
-     * @brief The offset (in seconds) of the system clock relative to the
-     * server time calculated from timestamps in the client SNTP request and
-     * server SNTP response packets. This information can be used to synchronize
-     * the system clock with a "slew" or "step" correction approach.
+     * @brief The offset of the system clock relative to the server time calculated
+     * from timestamps in the client SNTP request and server SNTP response packets.
+     * This information can be used to synchronize the system clock with a "slew", "step" OR
+     * combination of the two correction approaches.
      *
      * @note The library calculates the clock-offset value using the On-Wire
      * protocol suggested by the NTPv4 specification. For more information,

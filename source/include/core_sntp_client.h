@@ -138,7 +138,7 @@ typedef void ( * SntpGetTime_t )( SntpTimestamp_t * pCurrentTime );
  */
 typedef void ( * SntpSetTime_t )( const SntpServerInfo_t * pTimeServer,
                                   const SntpTimestamp_t * pServerTime,
-                                  int32_t clockOffsetSec,
+                                  const SntpClockOffset_t * pClockOffsetSec,
                                   SntpLeapSecondInfo_t leapSecondInfo );
 
 /**
