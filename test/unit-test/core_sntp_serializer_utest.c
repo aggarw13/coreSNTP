@@ -178,7 +178,7 @@ static void testClockOffsetCalculation( SntpTimestamp_t * clientTxTime,
 
     /* Make sure that the API has indicated in the output parameter that
      * clock-offset could not be calculated. */
-    TEST_ASSERT_EQUAL( expectedClockOffset, parsedData.clockOffsetSec );
+    TEST_ASSERT_EQUAL( ( int64_t ) expectedClockOffset * 1000, parsedData.clockOffsetMs );
 
     /* Validate other fields in the output parameter. */
     TEST_ASSERT_EQUAL( 0, memcmp( &parsedData.serverTime, serverTxTime, sizeof( SntpTimestamp_t ) ) );
@@ -732,7 +732,7 @@ void test_DeserializeResponse_AcceptedResponse_LeapSecond( void )
                                                                   &parsedData ) );                        \
                                                                                                           \
         /* As the clock and server times are same, the clock offset, should be zero. */                   \
-        TEST_ASSERT_EQUAL( 0, parsedData.clockOffsetSec );                                                \
+        TEST_ASSERT_EQUAL( 0, parsedData.clockOffsetMs );                                                 \
                                                                                                           \
         /* Validate other fields in the output parameter. */                                              \
         TEST_ASSERT_EQUAL( 0, memcmp( &parsedData.serverTime, &serverTime, sizeof( SntpTimestamp_t ) ) ); \

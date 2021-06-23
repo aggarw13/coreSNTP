@@ -121,7 +121,7 @@
  * determined based on comparing first order difference values between all possible NTP era
  * configurations of the systems.
  */
-#define CLOCK_OFFSET_MAX_TIME_DIFFERENCE    ( ( uint64_t ) INT32_MAX + 1 )
+#define CLOCK_OFFSET_MAX_TIME_DIFFERENCE    ( ( int64_t ) INT32_MAX + 1 )
 
 /**
  * @brief Macro to represent the total seconds that are represented in an NTP era period.
@@ -210,16 +210,9 @@ static uint32_t readWordFromNetworkByteOrderMemory( const uint32_t * ptr )
  *
  * @return The absolute value of @p value.
  */
-static uint64_t absoluteOf( int64_t value )
+static int64_t absoluteOf( int64_t value )
 {
-    int64_t valCopy = value;
-
-    if( valCopy < 0 )
-    {
-        valCopy = 0 - value;
-    }
-
-    return ( uint64_t ) valCopy;
+    return ( value >= 0 ) ? value : ( ( int64_t ) 0 - value );
 }
 
 /**
@@ -280,7 +273,7 @@ static int64_t safeTimeDifference( const SntpTimestamp_t * pServerTime,
 
     /* Store the absolute value of the time difference which will be used for comparison with
      * different cases of relative NTP era configuration of client and server times. */
-    uint64_t absSameEraDiff = absoluteOf( diffWithNoEraAdjustment );
+    int64_t absSameEraDiff = absoluteOf( diffWithNoEraAdjustment );
 
     /* If the absolute difference value is 2^31 seconds, it means that the server and client times are
      * away by exactly half the range of SNTP timestamp "second" values representable in unsigned 32 bits.
@@ -317,8 +310,8 @@ static int64_t safeTimeDifference( const SntpTimestamp_t * pServerTime,
 
         /* Store the absolute value equivalents of all the time difference configurations
          * for easier comparison to smallest value from them. */
-        uint64_t absServerEraAheadDiff = absoluteOf( diffWithServerEraAdjustment );
-        uint64_t absClientEraAheadDiff = absoluteOf( diffWithClientEraAdjustment );
+        int64_t absServerEraAheadDiff = absoluteOf( diffWithServerEraAdjustment );
+        int64_t absClientEraAheadDiff = absoluteOf( diffWithClientEraAdjustment );
 
         /* Determine the correct relative era of client and server times by checking which era
          * configuration of difference value represents the least difference. */
@@ -403,13 +396,11 @@ static void calculateClockOffset( const SntpTimestamp_t * pClientTxTime,
                                   const SntpTimestamp_t * pServerRxTime,
                                   const SntpTimestamp_t * pServerTxTime,
                                   const SntpTimestamp_t * pClientRxTime,
-                                  SntpClockOffset_t * pClockOffset )
+                                  int64_t * pClockOffset )
 {
     /* Variable for storing the first-order difference between timestamps. */
     int64_t firstOrderDiffSend = 0;
     int64_t firstOrderDiffRecv = 0;
-    int64_t clockOffset = 0;
-    uint64_t absClockOffSet = 0U;
 
     assert( pClientTxTime != NULL );
     assert( pServerRxTime != NULL );
@@ -430,17 +421,7 @@ static void calculateClockOffset( const SntpTimestamp_t * pClientTxTime,
     /* Now calculate the system clock-offset relative to server time as the average of the
      * first order difference of timestamps in both directions of network path.
      * Note: This will ALWAYS represent offset in the range of [-68 years, +68 years]. */
-    clockOffset = ( firstOrderDiffSend + firstOrderDiffRecv ) / 2;
-    absClockOffSet = absoluteOf( clockOffset );
-
-    /* Set the polarity state for the clock-offset in the output parameter depending to indicate
-     * whether the client time is behind OR ahead of the server time. */
-    pClockOffset->isisClientBehindServer = ( clockOffset > 0 ) ? true : false;
-
-    /* Set the clock-offset value in the output parameter by break the calculated value
-     * into seconds and milliseconds. */
-    pClockOffset->seconds = ( uint32_t ) ( absClockOffSet / 1000U );
-    pClockOffset->milliseconds = ( uint16_t ) ( absClockOffSet % 1000U );
+    *pClockOffset = ( firstOrderDiffSend + firstOrderDiffRecv ) / 2;
 }
 
 /**
@@ -561,7 +542,7 @@ static SntpStatus_t parseValidSntpResponse( const SntpPacket_t * pResponsePacket
                               &serverRxTime,
                               &pParsedResponse->serverTime,
                               pResponseRxTime,
-                              &pParsedResponse->clockOffset );
+                              &pParsedResponse->clockOffsetMs );
     }
 
     return status;

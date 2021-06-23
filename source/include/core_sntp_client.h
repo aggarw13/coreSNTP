@@ -116,8 +116,8 @@ typedef void ( * SntpGetTime_t )( SntpTimestamp_t * pCurrentTime );
  *
  * @param[in] pTimeServer The time server used to request time.
  * @param[in] pServerTime The current time returned by the @p pTimeServer.
- * @param[in] clockOffSetSec The calculated clock offset of the system relative
- * to the server time.
+ * @param[in] clockOffSetMs The calculated clock offset (in milliseconds) of the
+ * system relative to the server time.
  * @param[in] leapSecondInfo Information about whether there is about an upcoming
  * leap second adjustment of insertion or deletion in the last minute before midnight
  * on the last day of the current month. For more information on leap seconds, refer
@@ -129,7 +129,7 @@ typedef void ( * SntpGetTime_t )( SntpTimestamp_t * pCurrentTime );
  * depending on the application needs.
  * If the application requires a smooth time continuum of system time is required,
  * then the "slew" discipline methodology can be used with the clock offset value,
- * @p clockOffSetSec, to apply correction to the system clock with a "slew rate"
+ * @p clockOffSetMs, to apply correction to the system clock with a "slew rate"
  * (that is higher than the SNTP polling rate).
  * If the application can accept sudden jump in time (forward or backward), then
  * the "step" discipline methodology can be used to directly update the system
@@ -138,7 +138,7 @@ typedef void ( * SntpGetTime_t )( SntpTimestamp_t * pCurrentTime );
  */
 typedef void ( * SntpSetTime_t )( const SntpServerInfo_t * pTimeServer,
                                   const SntpTimestamp_t * pServerTime,
-                                  const SntpClockOffset_t * pClockOffsetSec,
+                                  int64_t pClockOffsetMs,
                                   SntpLeapSecondInfo_t leapSecondInfo );
 
 /**
